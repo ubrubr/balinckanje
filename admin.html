@@ -90,7 +90,7 @@ function render(d){
  document.querySelectorAll('[data-screen]').forEach(function(b){b.classList.toggle('active',b.dataset.screen===d.displayMode);});
  $('#team-list').innerHTML=B.teams(d,16).map(function(t){return '<div class="team-line"><strong>EKIPA '+t.number+'</strong><span>'+esc(t.players.length?t.players.map(function(p){return p.name;}).join(' + '):'—')+'</span></div>';}).join('');
  if(!$('#tab-players').contains(document.activeElement))$('#player-list').innerHTML=d.players.map(function(p){return '<label>'+esc(p.id)+'<input data-player="'+esc(p.id)+'" value="'+esc(p.name)+'" maxlength="64"></label>';}).join('');
- if(!$('#tab-matches').contains(document.activeElement)){
+ if(!($('#tab-matches').contains(document.activeElement) && document.activeElement.tagName==='INPUT')){
   $('#quarterfinals').innerHTML=fixtures.slice(0,4).map(function(m){return matchView(d,m);}).join('');
   $('#semifinals').innerHTML=fixtures.slice(4,6).map(function(m){return matchView(d,m);}).join('');
   $('#final-match').innerHTML=matchView(d,fixtures[6]);
