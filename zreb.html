@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="sl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f56a5d">
+  <title>Žrebanje skupin — Turnir v balinčkanju</title>
+  <style>
+    :root { --ink:#191b3e; --blue:#1836cd; --coral:#ff7164; --yellow:#ffdd54; --mint:#61dbaa; --sky:#18b6e8; --red:#f35461; }
+    * { box-sizing:border-box; }
+    html,body { width:100%;height:100%; margin:0;overflow:hidden; background:#231c34; font-family:Arial,Helvetica,sans-serif; }
+    #viewport {position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    #stage {position:absolute;width:1080px;height:1920px;overflow:hidden;transform-origin:center center;color:var(--ink);background:linear-gradient(166deg,#ff9483 0%,#ff7367 36%,#fa645f 77%,#e34e59 100%);isolation:isolate;box-shadow:0 0 80px #0004;}
+    /* Racetrack geometry from the source poster, recreated as resolution-independent CSS. */
+    .track {position:absolute;inset:-100px -240px;z-index:-2;opacity:.57;transform:rotate(-18deg);background:repeating-linear-gradient(0deg,transparent 0px,transparent 280px,rgba(255,255,255,.93) 283px,rgba(255,255,255,.93) 288px,transparent 291px,transparent 302px);pointer-events:none;}
+    .track:before {content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,#fff2 42%,transparent 68%);}
+    #stage:after {content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 40% 28%,#ffffff55 0%,transparent 47%),radial-gradient(ellipse at 85% 99%,#a71f5140 0%,transparent 47%);pointer-events:none;z-index:-1;}
+    .header {height:256px;padding:76px 74px 0;position:relative;z-index:2;}
+    .eyebrow {display:flex;gap:18px;align-items:center;font-weight:900;font-size:24px;letter-spacing:5px;color:#fff;text-shadow:0 2px 12px #9a275a60;}
+    .eyebrow:before {content:"";display:block;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 0 0 7px #fff4;}
+    .header h1 {margin:27px 0 0;color:var(--blue);font-size:92px;line-height:.91;font-style:italic;letter-spacing:-5px;font-weight:900;text-shadow:0 4px 0 #ffffff30;}
+    .header h1 span {display:block;}
+    .ornament {position:absolute;border-radius:50%;width:140px;height:140px;border:33px solid #ffe356;filter:drop-shadow(0 12px 7px #81254635);pointer-events:none;opacity:.98;}
+    .ornament:after{content:"";position:absolute;inset:-17px;border-radius:50%;border:3px solid #fff6;}
+    .orn1{left:-52px;top:-55px;border-color:#19b5e7;transform:rotate(18deg)}
+    .orn2{left:165px;top:-86px;width:190px;height:190px;border-width:47px}
+    .orn3{right:177px;top:-101px;width:222px;height:222px;border-width:53px;border-color:#6bd88f}
+    .orn4{right:-84px;top:-80px;width:155px;height:155px;border-width:39px;border-color:#ee5267}
+    .draw-area {position:absolute;top:271px;left:58px;right:58px;height:687px;z-index:1;}
+    .wheel-aura {position:absolute;top:-18px;left:149px;width:665px;height:665px;border-radius:50%;background:radial-gradient(circle,#fff9 0%,#fff5 49%,transparent 70%);filter:blur(14px);}
+    .wheel-wrap {position:absolute;top:0;left:158px;width:650px;height:650px;filter:drop-shadow(0 14px 1px #813b5360) drop-shadow(0 32px 38px #72244650);}
+    .wheel-svg {width:100%;height:100%;overflow:visible;}
+    #wheel-disc {will-change:transform;}
+    .wheel-pointer {position:absolute;top:-22px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:29px solid transparent;border-right:29px solid transparent;border-top:68px solid #193cc9;filter:drop-shadow(0 6px 2px #0005);z-index:3;}
+    .wheel-pointer:before{content:"";position:absolute;left:-17px;top:-68px;width:34px;height:34px;background:#fff;border-radius:50%;box-shadow:0 0 0 8px #193cc9;}
+    .wheel-hub {position:absolute;width:166px;height:166px;border-radius:50%;background:#fdfcf9;top:calc(50% - 83px);left:calc(50% - 83px);border:12px solid #173bd0;box-shadow:0 6px 20px #0005,inset 0 -7px 0 #eee6e3;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;}
+    .wheel-hub strong{font-size:62px;letter-spacing:-4px;color:#1932c5;line-height:1}
+    .wheel-hub span{font-size:16px;font-weight:900;letter-spacing:2px;color:#36426e}
+    .wheel-label {position:absolute;left:8px;top:193px;width:195px;height:106px;border-radius:18px;background:#fffefa;box-shadow:0 13px 1px #da5257,0 22px 22px #883b3f44;transform:rotate(-9deg);z-index:3;padding:17px 13px;text-align:center;}
+    .wheel-label .kicker{font-size:16px;font-weight:900;letter-spacing:2px;color:#5d5b76}
+    .wheel-label .big{display:block;font-size:53px;line-height:1.08;font-weight:900;color:#1836cd;}
+    .wheel-label small{font-weight:900;color:#8a8396;font-size:14px;}
+    .live-box {position:absolute;top:942px;left:62px;right:62px;height:166px;background:#fffefb;border-radius:26px;box-shadow:0 17px 0 #bd4d578f,0 25px 30px #612a3750;z-index:4;display:flex;align-items:center;justify-content:space-between;padding:27px 34px;gap:18px;}
+    .live-box:before{content:"";position:absolute;top:0;left:32px;right:32px;height:8px;background:linear-gradient(90deg,#f35461,#ffd450,#54dbad,#22b8e8);border-radius:0 0 15px 15px;}
+    .live-content {min-width:0;flex:1;}
+    .live-kicker {font-size:19px;font-weight:900;letter-spacing:2.4px;color:#707187;text-transform:uppercase;}
+    .live-name {font-size:58px;font-weight:900;line-height:1.1;letter-spacing:-2px;margin-top:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1c2146;}
+    .live-sub {font-size:21px;font-weight:800;color:#575e7e;margin-top:5px;min-height:25px;}
+    .live-number {flex:none;width:132px;height:132px;border-radius:26px;background:#193aca;color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:inset 0 -11px 0 #0b2085,0 8px 0 #bed4f8;}
+    .live-number strong {font-size:81px;line-height:1;letter-spacing:-5px;}
+    .live-number small {font-size:14px;font-weight:900;letter-spacing:2px;}
+    .live-number.revealed{animation:pop .55s cubic-bezier(.12,1.55,.26,1) both;}
+    @keyframes pop {from{transform:scale(.55) rotate(-8deg);opacity:.45}to{transform:scale(1) rotate(0);opacity:1}}
+    .roster-panel {position:absolute;top:1150px;left:62px;right:62px;height:669px;background:#fffefc;border-radius:25px;box-shadow:0 14px 0 #e0b6a5a3,0 30px 44px #662f4a3b;z-index:2;padding:29px 27px 20px;}
+    .roster-titlebar {display:flex;align-items:center;justify-content:space-between;height:58px;padding:0 7px 16px;border-bottom:3px solid #edf0f2;}
+    .roster-titlebar h2 {margin:0;font-weight:900;letter-spacing:-.8px;font-size:32px;}
+    .roster-count {font-size:21px;font-weight:900;letter-spacing:1px;color:#5e648a;}
+    .roster-count strong{color:var(--blue);}
+    .roster-grid {display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,128px);gap:10px 15px;margin-top:17px;}
+    .team-card {display:flex;align-items:center;gap:13px;min-width:0;position:relative;padding:10px 11px;border-radius:17px;background:#f7f8fd;border:2px solid #ebedf5;overflow:hidden;transition:background .22s,border-color .22s,box-shadow .22s;}
+    .team-card.is-current {background:#fff5dc;border-color:#ffd05d;box-shadow:0 0 0 3px #ffe6a755;}
+    .team-card.is-complete {background:#f1f9f8;}
+    .team-card.is-complete.is-current {background:#fff5dc;}
+    .team-number {flex:0 0 84px;width:84px;height:92px;border-radius:15px;background:var(--team-color);border:3px solid #ffffff90;box-shadow:inset 0 -9px 0 #00000016,0 5px 11px #20204022;display:flex;align-items:center;justify-content:center;position:relative;color:#162051;font-size:67px;font-weight:900;letter-spacing:-4px;line-height:1;}
+    .team-number:after {content:"";position:absolute;right:6px;top:7px;width:10px;height:10px;background:#fff9;border-radius:50%;}
+    .team-text {flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:7px;}
+    .team-label {font-size:16px;line-height:1;font-weight:900;letter-spacing:1px;color:#707890;}
+    .team-member {min-height:32px;font-size:29px;line-height:1.08;letter-spacing:-.7px;font-weight:900;color:#18203f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .team-member.is-empty {color:#c7cbd6;}
+    .team-member.just-added {animation:numIn .53s cubic-bezier(.13,1.25,.24,1) both;}
+    @keyframes numIn{from{opacity:0;transform:scale(.82) translateY(13px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .footer {position:absolute;bottom:31px;left:73px;right:73px;display:flex;justify-content:space-between;align-items:center;color:#fff;font-weight:900;font-size:20px;letter-spacing:2px;text-shadow:0 2px 7px #841f4b77;}
+    .footer strong{font-size:22px;}
+    .progress-track {position:absolute;bottom:91px;left:76px;right:76px;height:8px;border-radius:9px;background:#fff7;overflow:hidden;}
+    .progress-fill {height:100%;width:0;background:var(--blue);border-radius:9px;transition:width .4s ease;}
+    .footer-status{display:flex;align-items:center;gap:10px;}
+    .footer-status:before{content:"";width:12px;height:12px;background:#ffe061;border-radius:50%;box-shadow:0 0 12px #ffe061;}
+    .final-note {opacity:0;position:absolute;left:69px;right:69px;top:1108px;z-index:3;font-size:0;text-align:center;pointer-events:none;}
+    .final-note.show {animation:finish .65s ease-out both;}
+    @keyframes finish{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+    .final-note span{display:inline-block;color:#fff;font-weight:900;font-size:24px;letter-spacing:4px;text-shadow:0 3px 14px #773b43;}
+    .intro-pill {position:absolute;right:16px;top:40px;background:#fff;color:#1937c8;padding:9px 16px;border-radius:30px;font-weight:900;letter-spacing:1px;font-size:16px;box-shadow:0 5px 0 #cf5a6473;}
+    .replay-indicator {display:none;position:absolute;bottom:76px;left:50%;transform:translateX(-50%);padding:9px 17px;border-radius:40px;background:#ffffffcc;color:#38466e;font-size:15px;letter-spacing:1px;font-weight:900;z-index:5;}
+    body.is-final #stage .wheel-wrap {filter:drop-shadow(0 12px 1px #813b5360) drop-shadow(0 24px 30px #72244630);}
+    /* All text elements remain HTML or SVG so they are sharp at digital-signage resolution. */
+    @media (prefers-reduced-motion:reduce){.live-number.revealed,.player-number.just-revealed,.final-note.show{animation:none}}
+  </style>
+</head>
+<body>
+  <div id="viewport">
+    <main id="stage" aria-label="Žrebanje številk in skupin za turnir v balinčkanju">
+      <div class="track" aria-hidden="true"></div>
+      <div class="ornament orn1" aria-hidden="true"></div><div class="ornament orn2" aria-hidden="true"></div>
+      <div class="ornament orn3" aria-hidden="true"></div><div class="ornament orn4" aria-hidden="true"></div>
+      <header class="header">
+        <div class="eyebrow">TURNIR V BALINČKANJU</div>
+        <h1><span>ŽREBANJE</span><span>SKUPIN</span></h1>
+      </header>
+      <section class="draw-area" aria-label="Animirano kolo številk">
+        <div class="wheel-aura"></div>
+        <div class="wheel-wrap">
+          <svg class="wheel-svg" viewBox="0 0 650 650" role="img" aria-label="Vrteče se kolo s številkami od 1 do 8, vsaka številka je dvakrat">
+            <defs><filter id="ringGlow"><feGaussianBlur stdDeviation="5"/></filter></defs>
+            <circle cx="325" cy="325" r="319" fill="#fffded" stroke="#fff" stroke-width="8"/>
+            <circle cx="325" cy="325" r="300" fill="#20205b" stroke="#20205b" stroke-width="10"/>
+            <g id="wheel-disc"></g>
+            <circle cx="325" cy="325" r="295" fill="none" stroke="#fff" stroke-width="8"/>
+            <circle cx="325" cy="325" r="314" fill="none" stroke="#1435bc" stroke-width="16"/>
+            <g id="outer-dots"></g>
+          </svg>
+          <div class="wheel-pointer" aria-hidden="true"></div>
+          <div class="wheel-hub"><strong id="hub-number">8</strong><span id="hub-label">SKUPIN</span></div>
+        </div>
+        <div class="wheel-label"><div class="kicker" id="draw-state-label">PRIPRAVI SE</div><span class="big" id="draw-count">05</span><small id="draw-state-sub">SEKUND</small></div>
+      </section>
+      <section class="live-box" aria-live="polite">
+        <div class="live-content"><div class="live-kicker" id="spot-kicker">ŽREB SE ZAČNE ČEZ</div><div class="live-name" id="spot-name">5 SEKUND</div><div class="live-sub" id="spot-sub">8 ekip · po 2 igralca</div></div>
+        <div class="live-number" id="spot-badge"><strong id="spot-value">?</strong><small id="spot-label">EKIPA</small></div>
+      </section>
+      <div class="final-note" id="final-note"><span>VSE EKIPE SO SESTAVLJENE</span></div>
+      <section class="roster-panel" aria-label="Osem ekip, vsaka s svojima dvema igralcema">
+        <div class="roster-titlebar"><h2>SESTAVA EKIP</h2><div class="roster-count"><strong id="done-count">0</strong> / 16 ŽREBOV</div></div>
+        <div class="roster-grid" id="roster"></div>
+      </section>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="footer"><span>8 EKIP <span style="opacity:.6">/</span> PO 2 IGRALCA</span><span class="footer-status" id="footer-status">ZAČETEK ŽREBA</span></div>
+      <div class="replay-indicator" id="replay-indicator">NOV ŽREB SE ZAČENJA</div>
+    </main>
+  </div>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
+  <script src="./shared.js"></script>
+  <script>
+  (function(){
+    'use strict';
+    // Player names, teams and start time are read from Supabase.
+    var INTRO_MS=5000, STEP_MS=8500, SPIN_MS=7140, FINAL_MS=30000;
+    var N=16,CYCLE_MS=INTRO_MS+STEP_MS*N+FINAL_MS;
+    var colors=['#fb6263','#ffe05d','#6fe4a5','#23bfed','#cfa0ff','#ffb362','#6bdcc5','#ff9ac5']; // 8 prepoznavnih barv, po ena na ekipo
+    var stage=document.getElementById('stage');
+    var wheel=document.getElementById('wheel-disc');
+    var roster=document.getElementById('roster');
+    var elements={ hub:document.getElementById('hub-number'),hubLabel:document.getElementById('hub-label'),count:document.getElementById('draw-count'),stateLabel:document.getElementById('draw-state-label'),stateSub:document.getElementById('draw-state-sub'),kicker:document.getElementById('spot-kicker'),name:document.getElementById('spot-name'),sub:document.getElementById('spot-sub'),value:document.getElementById('spot-value'),badge:document.getElementById('spot-badge'),done:document.getElementById('done-count'),progress:document.getElementById('progress-fill'),footer:document.getElementById('footer-status'),finalNote:document.getElementById('final-note') };
+    var current={players:[],assignments:{},startedAt:null,autoLoop:false,standalone:false};
+    var serverOffset=0,lastVisualKey='',lastWheelRotation=-1000,previousRevealed=-1;
+    var spinStart=[],spinEnd=[];
+    var urlSearch=new URLSearchParams(window.location.search);
+    if(urlSearch.get('loop')==='0')current.autoLoop=false;
+
+    function fitStage(){
+      var scale=Math.min(window.innerWidth/1080,window.innerHeight/1920);
+      stage.style.transform='scale('+scale+')';
+      stage.style.left=Math.round((window.innerWidth-1080*scale)/2 + (1080*scale-1080)/2)+'px';
+      stage.style.top=Math.round((window.innerHeight-1920*scale)/2 + (1920*scale-1920)/2)+'px';
+    }
+    window.addEventListener('resize',fitStage);fitStage();
+    function segmentPath(center,rad,a0,a1){var r=Math.PI/180;return 'M '+center+' '+center+' L '+(center+rad*Math.cos(a0*r)).toFixed(4)+' '+(center+rad*Math.sin(a0*r)).toFixed(4)+' A '+rad+' '+rad+' 0 '+(a1-a0>180?1:0)+' 1 '+(center+rad*Math.cos(a1*r)).toFixed(4)+' '+(center+rad*Math.sin(a1*r)).toFixed(4)+' Z';}
+    function buildWheel(){
+      var SVG='http://www.w3.org/2000/svg',fr=document.createDocumentFragment();
+      for(var i=0;i<16;i++){
+        var a0=-90+i*22.5,a1=a0+22.5,mid=(a0+a1)/2;
+        var path=document.createElementNS(SVG,'path');path.setAttribute('d',segmentPath(325,294,a0,a1));path.setAttribute('fill',colors[i%8]);path.setAttribute('stroke','#fffbe9');path.setAttribute('stroke-width','2');fr.appendChild(path);
+        var r=220,rad=mid*Math.PI/180;
+        var label=document.createElementNS(SVG,'text');label.setAttribute('x',(325+Math.cos(rad)*r).toFixed(2));label.setAttribute('y',(325+Math.sin(rad)*r+11).toFixed(2));label.setAttribute('font-size','39');label.setAttribute('font-family','Arial, sans-serif');label.setAttribute('font-weight','900');label.setAttribute('fill','#1d265b');label.setAttribute('text-anchor','middle');label.textContent=String((i%8)+1);fr.appendChild(label);
+      }
+      wheel.appendChild(fr);
+      var dots=document.getElementById('outer-dots');
+      for(var j=0;j<32;j++) {var a=(j*360/32)*Math.PI/180,d=document.createElementNS(SVG,'circle');d.setAttribute('cx',(325+312*Math.cos(a)).toFixed(2));d.setAttribute('cy',(325+312*Math.sin(a)).toFixed(2));d.setAttribute('r',j%2===0?'4':'2.5');d.setAttribute('fill',j%2===0?'#fff':'#ffe99b');dots.appendChild(d);}
+    }
+    function buildRoster(){
+      // Številke ekip 1..8 so vidne od ZAČETKA; animacija dopolnjuje le imena.
+      roster.innerHTML='';
+      for(var t=1;t<=8;t++){
+        var card=document.createElement('div');card.className='team-card';card.id='team-'+t;
+        card.style.setProperty('--team-color',colors[t-1]);
+        card.style.gridColumn=String(Math.floor((t-1)/4)+1);
+        card.style.gridRow=String(((t-1)%4)+1);
+        var number=document.createElement('div');number.className='team-number';number.textContent=t;
+        var text=document.createElement('div');text.className='team-text';
+        var label=document.createElement('div');label.className='team-label';label.textContent='EKIPA '+t;
+        text.appendChild(label);
+        for(var s=0;s<2;s++){
+          var member=document.createElement('div');member.className='team-member is-empty';
+          member.id='team-member-'+t+'-'+s;member.textContent='—';text.appendChild(member);
+        }
+        card.appendChild(number);card.appendChild(text);roster.appendChild(card);
+      }
+    }
+    function prepRotations(){
+      spinStart=[];spinEnd=[];var last=0;
+      var used={};
+      current.players.forEach(function(p){
+        var team=current.assignments[p.id]||1;
+        // Številka ekipe je dvakrat na kolesu (16 polj, a le 8 različnih številk).
+        var repetition=used[team]||0;used[team]=repetition+1;
+        var segment=(team-1)+8*repetition;
+        var desired=(((360-((segment+.5)*22.5))%360)+360)%360;
+        var diff=(((desired-(last%360))%360)+360)%360;
+        spinStart.push(last);last+=360*5+diff;spinEnd.push(last);
+      });
+    }
+    function applyState(state,standalone){
+      if(!state || !Array.isArray(state.players) || state.players.length!==16)return;
+      var prev=JSON.stringify(current.players);
+      current.players=state.players.map(function(p){return{id:p.id,name:p.name};});
+      current.assignments=(state.run&&state.run.assignments)||{};
+      current.startedAt=state.run?state.run.startedAt:null;
+      current.autoLoop=!!state.autoLoop;
+      current.standalone=!!standalone;
+      if(!standalone && typeof state.serverNow==='number')serverOffset=state.serverNow-Date.now();
+      if(JSON.stringify(current.players)!==prev)buildRoster();
+      prepRotations();lastVisualKey='';previousRevealed=-1;
+    }
+    function easeOut(t){return 1-Math.pow(1-t,4.1);}
+    function updateWheel(rot){if(Math.abs(rot-lastWheelRotation)>.055){wheel.setAttribute('transform','rotate('+rot.toFixed(3)+' 325 325)');lastWheelRotation=rot;}}
+    function updateText(phase,index,visible,t,remaining){
+      var key=phase+'|'+index+'|'+visible+'|'+Math.ceil(remaining/1000);
+      if(key===lastVisualKey)return;
+      lastVisualKey=key;
+      var shown=(phase==='final')?16:Math.max(0,index)+(visible?1:0);
+      elements.done.textContent=String(shown);
+      elements.progress.style.width=(shown/16*100).toFixed(2)+'%';
+      var teamNames=[[],[],[],[],[],[],[],[]];
+      current.players.forEach(function(p,i){
+        var revealed=phase==='final'||(phase==='draw'&&(i<index||(i===index&&visible)));
+        if(revealed){
+          var team=current.assignments[p.id];
+          if(team>=1&&team<=8)teamNames[team-1].push(p.name);
+        }
+      });
+      for(var teamId=1;teamId<=8;teamId++){
+        var members=teamNames[teamId-1],card=document.getElementById('team-'+teamId);
+        card.classList.toggle('is-complete',members.length===2);
+        card.classList.toggle('is-current',phase==='draw'&&visible&&current.assignments[current.players[index].id]===teamId);
+        for(var j=0;j<2;j++){
+          var slot=document.getElementById('team-member-'+teamId+'-'+j);
+          var value=members[j]||'—';
+          if(slot.textContent!==value){
+            slot.textContent=value;slot.classList.toggle('is-empty',!members[j]);
+            if(members[j]){slot.classList.remove('just-added');void slot.offsetWidth;slot.classList.add('just-added');}
+            else slot.classList.remove('just-added');
+          }
+        }
+      }
+      elements.finalNote.classList.toggle('show',phase==='final');
+      elements.badge.classList.toggle('revealed',phase==='draw'&&visible);
+      if(phase==='intro'){
+        elements.hub.textContent='8';elements.hubLabel.textContent='SKUPIN';
+        elements.stateLabel.textContent='ZAČETEK ČEZ';elements.count.textContent=('0'+Math.max(1,Math.ceil(remaining/1000))).slice(-2);elements.stateSub.textContent='SEKUND';
+        elements.kicker.textContent='ŽREB SE ZAČNE ČEZ';elements.name.textContent=Math.max(1,Math.ceil(remaining/1000))+' SEKUND';
+        elements.sub.textContent='8 ekip · vsaka ima dve mesti';elements.value.textContent='?';elements.footer.textContent='PRIPRAVA ŽREBA';
+      }else if(phase==='draw'){
+        var player=current.players[index],teamNumber=current.assignments[player.id];
+        elements.hub.textContent='8';elements.hubLabel.textContent='SKUPIN';
+        elements.stateLabel.textContent='ŽREB '+String(index+1)+'/16';
+        elements.count.textContent=('0'+Math.max(1,Math.ceil(remaining/1000))).slice(-2);
+        elements.stateSub.textContent='SEKUND';
+        elements.kicker.textContent=visible?'DODELJENA EKIPA':'NA VRSTI: '+String(index+1)+'/16';
+        elements.name.textContent=player.name;
+        elements.sub.textContent=visible?'Ekipa '+teamNumber+' · '+teamNames[teamNumber-1].length+'. od 2 članov':'Kolo določa ekipo …';
+        elements.value.textContent=visible?String(teamNumber):'?';elements.footer.textContent='SESTAVLJANJE EKIP';
+      }else if(phase==='final'){
+        elements.hub.textContent='8';elements.hubLabel.textContent='EKIP';
+        elements.stateLabel.textContent='KONEC ŽREBA';elements.count.textContent=('0'+Math.max(0,Math.ceil(remaining/1000))).slice(-2);elements.stateSub.textContent='SEKUND';
+        elements.kicker.textContent='ŽREB JE ZAKLJUČEN';elements.name.textContent='VSE EKIPE SO ZNANE';
+        elements.sub.textContent='8 ekip · vsaka ima 2 igralca';elements.value.textContent='✓';elements.footer.textContent='KONČNA SESTAVA EKIP';
+      }else{
+        elements.hub.textContent='8';elements.hubLabel.textContent='SKUPIN';
+        elements.stateLabel.textContent='PRIPRAVLJENO';elements.count.textContent='—';elements.stateSub.textContent='';
+        elements.kicker.textContent='PRIPRAVA ŽREBA';elements.name.textContent='ZAČETEK KMALU';elements.sub.textContent='8 ekip · po 2 igralca';elements.value.textContent='?';elements.footer.textContent='PRIPRAVA';
+      }
+    }
+    function frame(){
+      var start=current.startedAt;
+      if(start===null){updateWheel(0);updateText('idle',0,false,0,0);requestAnimationFrame(frame);return;}
+      var elapsed=Math.max(0,Date.now()+serverOffset-start);
+      if(current.autoLoop)elapsed=elapsed%CYCLE_MS;else elapsed=Math.min(elapsed,CYCLE_MS);
+      if(elapsed<INTRO_MS){updateWheel(0);updateText('intro',0,false,elapsed,INTRO_MS-elapsed);}
+      else if(elapsed<INTRO_MS+STEP_MS*N){
+        var e=elapsed-INTRO_MS,idx=Math.min(15,Math.floor(e/STEP_MS)),p=e%STEP_MS;
+        var visible=p>=SPIN_MS;
+        var rot=p<SPIN_MS?spinStart[idx]+(spinEnd[idx]-spinStart[idx])*easeOut(p/SPIN_MS):spinEnd[idx];
+        updateWheel(rot);updateText('draw',idx,visible,p,STEP_MS-p);
+      }else{
+        updateWheel(spinEnd[15]||0);
+        updateText('final',16,true,elapsed,Math.max(0,CYCLE_MS-elapsed));
+      }
+      requestAnimationFrame(frame);
+    }
+    // Hosted display: Supabase is the only authoritative draw source.
+    // 5 s introduction; 16 × 8.5 s; 30 s final panel. Never re-randomize on reload.
+    buildWheel();buildRoster();
+    elements.name.textContent='POVEZOVANJE…';
+    window.Balinckanje.watch(function(row){
+      var data=row.data||{}, d=data.draw||{}, players=data.players||[];
+      if(players.length!==16)return;
+      INTRO_MS=d.introMs||5000;STEP_MS=d.stepMs||8500;SPIN_MS=d.spinMs||7140;FINAL_MS=d.finalMs||30000;
+      CYCLE_MS=INTRO_MS+STEP_MS*N+FINAL_MS;
+      var byId={};players.forEach(function(p){byId[p.id]=p;});
+      var order=(d.order&&d.order.length===16)?d.order:players.map(function(p){return p.id;});
+      var sorted=order.map(function(id){return byId[id];}).filter(Boolean);
+      if(sorted.length!==16)return;
+      applyState({players:sorted,run:{assignments:d.assignments||{},startedAt:d.startedAt||null},autoLoop:!!d.loop,serverNow:Date.now()},false);
+    });
+    requestAnimationFrame(frame);
+  })();
+  </script>
+</body>
+</html>
