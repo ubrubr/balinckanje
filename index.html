@@ -1,16 +1,1 @@
-<!doctype html><html lang="sl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f56a5d"><title>Balinčkanje — Play Signage</title><style>*{box-sizing:border-box}html,body{margin:0;height:100%;background:#161825;overflow:hidden}iframe{display:block;border:0;width:100%;height:100%;background:#161825}#warning{position:fixed;bottom:10px;left:10px;right:10px;text-align:center;color:white;font:16px Arial;background:#702b37;padding:12px;display:none}</style></head>
-<body><iframe id="screen" title="Turnir v balinčkanju" src="./zreb.html" allow="fullscreen"></iframe><div id="warning">Povezava s podatki ni vzpostavljena.</div>
-<script src="./config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script><script src="./shared.js"></script>
-<script>(function(){
-  var frame=document.getElementById('screen');var current='zreb';var latest=null;
-  function choose(){
-    if(!latest)return;
-    var data=latest.data,mode=data.displayMode||'zreb';
-    if(mode==='zreb'&&data.autoToTeams&&window.Balinckanje.drawProgress(data).finished)mode='ekipe';
-    if(['zreb','ekipe','tekme'].indexOf(mode)<0)mode='zreb';
-    if(mode!==current){current=mode;frame.src='./'+mode+'.html';}
-  }
-  window.Balinckanje.watch(function(row){latest=row;document.getElementById('warning').style.display='none';choose();});
-  setInterval(choose,1000);
-  setTimeout(function(){if(!latest)document.getElementById('warning').style.display='block';},12000);
-})();</script></body></html>
+<!doctype html><html lang="sl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=./zreb.html?live=1"><title>Balinčkanje — Play Signage</title><style>html,body{margin:0;height:100%;background:#ee6f64;color:white;font:30px Arial;display:grid;place-items:center}a{color:white}</style></head><body><a href="./zreb.html?live=1">ODPRI ŽREB</a><script>location.replace('./zreb.html?live=1');</script></body></html>
