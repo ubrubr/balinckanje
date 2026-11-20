@@ -14,7 +14,7 @@ Pokončni spletni turnir (9:16) za Play Digital Signage CMS. Vsi podatki se sinh
 
 ## Povezave po objavi
 
-Če ustvarite javni GitHub repo `ubrubr/balinckanje`, omogočite GitHub Pages v `Settings > Pages > Deploy from a branch > main > /(root)`.
+Repozitorij `ubrubr/balinckanje` že vsebuje izvorno kodo. Za javno objavo omogočite GitHub Pages v `Settings > Pages > Build and deployment > Deploy from a branch > main > /(root)`; tega koraka GitHub povezava ne omogoča nastaviti samodejno.
 
 - `https://ubrubr.github.io/balinckanje/` — samodejno preklapljajoči javni prikaz (dodajte kot Play Webpage)
 - `https://ubrubr.github.io/balinckanje/admin.html` — telefon, brez prijave
