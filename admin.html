@@ -49,9 +49,9 @@ a{color:#64f5dd}pre{overflow:auto;background:#101c28;border-radius:10px;padding:
 <div class="panel"><h2>Izločilni sistem</h2><p>8 ekip → 4 četrtfinala → 2 polfinala → finale.</p><p>Pari: 1–8, 2–7, 3–6, 4–5. Zmagovalci samodejno napredujejo.</p><p>Tekma za tretje mesto je dodatna, za razglasitev bronaste ekipe.</p><p id="progress" class="hint">0 od 7 tekem</p></div>
 </section>
 <section id="tab-draw" hidden><div class="panel"><h2>Žreb 16 igralcev / 8 ekip</h2>
-<p>Vsaka številka ekipe 1–8 se pojavi dvakrat. Jan R. in Marko D. sta vedno skupaj.</p>
+<p>Vsaka številka ekipe 1–8 se dodeli dvema igralcema.</p>
 <p id="draw-status" class="hint">Žreb še ni bil izveden.</p>
-<div class="row"><button id="draw-create" class="primary">NOV NAKLJUČNI ŽREB</button><button id="draw-start">ZAČNI ANIMACIJO</button></div>
+<div class="row"><button id="draw-create" class="primary">USTVARI NOV ŽREB</button></div>
 <div class="row"><button id="draw-replay">PONOVI ISTI ŽREB</button><button id="draw-stop">ZAKLJUČI ANIMACIJO</button></div>
 <p class="hint">5 s uvoda, 16 × 8,5 s žreba in 30 s končnega prikaza.</p>
 </div></section>
@@ -62,7 +62,7 @@ a{color:#64f5dd}pre{overflow:auto;background:#101c28;border-radius:10px;padding:
 <div class="panel"><h2>3. mesto</h2><div id="bronze-match"></div><p class="hint">Tekma za 3. mesto je prostovoljna. Brez nje tretje mesto na stopničkah ostane prazno.</p></div>
 </section>
 <section id="tab-teams" hidden><div class="panel"><h2>Osem ekip</h2><div id="team-list"></div></div></section>
-<section id="tab-players" hidden><div class="panel"><h2>Uredi imena igralcev</h2><p class="hint">Spremembe imen ne spremenijo ekip. Igralca Jan R. in Marko D. imata fiksna ID-ja.</p><div id="player-list"></div><button class="primary" id="save-players">SHRANI IMENA</button></div></section>
+<section id="tab-players" hidden><div class="panel"><h2>Uredi imena igralcev</h2><p class="hint">Spremembe imen ne spremenijo že izžrebanih ekip.</p><div id="player-list"></div><button class="primary" id="save-players">SHRANI IMENA</button></div></section>
 <section id="tab-settings" hidden>
 <div class="panel"><h2>Varnostna kopija</h2><div class="row"><button id="download-json">IZVOZI JSON</button><label>Uvozi JSON<input id="upload-json" type="file" accept=".json,application/json"></label></div></div>
 <div class="panel"><h2>Ponastavitev</h2><button id="clear-games" class="danger">POČISTI REZULTATE</button><button id="reset-all" class="danger">PONASTAVI VES TURNIR</button><p class="hint">Ponastavitev ohrani imena igralcev.</p></div>
@@ -103,10 +103,10 @@ document.querySelectorAll('[data-screen]').forEach(function(b){b.onclick=functio
 $('#auto-to-teams').onchange=function(){var on=this.checked;act(function(){return change(function(d){d.autoToTeams=on;});});};
 $('#show-round').onclick=function(){var v=$('#round-view').value;act(function(){return change(function(d){d.displayMode='tekme';d.roundView=v;});});};
 $('#draw-create').onclick=function(){
- if(!confirmAction('Ustvarim nov žreb? Obstoječi rezultati bodo arhivirani in odstranjeni iz aktivnega turnirja.'))return;
- act(function(){return change(function(d){var draw=B.generateDraw(d.players);d.draw=Object.assign(d.draw||{},{assignments:draw.assignments,order:draw.order,startedAt:null,loop:false});d.archivedGames=(d.archivedGames||[]).concat(Object.keys(d.games||{}).length?[{savedAt:new Date().toISOString(),games:d.games}]:[]);d.games={};d.displayMode='zreb';d.roundView='turnir';});});
+ if(!confirmAction('Ustvarim nov naključni žreb in takoj zaženem animacijo? Obstoječi rezultati bodo arhivirani.'))return;
+ act(function(){return change(function(d){var draw=B.generateDraw(d.players);d.draw=Object.assign(d.draw||{},{assignments:draw.assignments,order:draw.order,startedAt:Date.now(),loop:false});d.archivedGames=(d.archivedGames||[]).concat(Object.keys(d.games||{}).length?[{savedAt:new Date().toISOString(),games:d.games}]:[]);d.games={};d.displayMode='zreb';d.roundView='turnir';});});
 };
-$('#draw-start').onclick=$('#draw-replay').onclick=function(){act(function(){return change(function(d){if(!d.draw||!d.draw.assignments)throw Error('Najprej ustvari žreb.');d.draw.startedAt=Date.now();d.draw.loop=false;d.displayMode='zreb';});});};
+$('#draw-replay').onclick=function(){act(function(){return change(function(d){if(!d.draw||!d.draw.assignments)throw Error('Najprej ustvari žreb.');d.draw.startedAt=Date.now();d.draw.loop=false;d.displayMode='zreb';});});};
 $('#draw-stop').onclick=function(){act(function(){return change(function(d){d.draw.startedAt=null;d.displayMode='ekipe';});});};
 $('#save-players').onclick=function(){var n={};document.querySelectorAll('[data-player]').forEach(function(el){n[el.dataset.player]=el.value.trim();});if(Object.values(n).some(function(v){return !v;})){error('Vsa imena morajo biti izpolnjena.');return;}act(function(){return change(function(d){d.players.forEach(function(p){p.name=n[p.id];});});});};
 $('#tab-matches').onclick=function(e){if(!e.target.classList.contains('save-match'))return;
