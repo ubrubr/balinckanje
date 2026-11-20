@@ -1,0 +1,35 @@
+<!doctype html><html lang="sl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f76c60"><title>Balinčkanje — Ekipe</title>
+<link rel="stylesheet" href="./display-style.css"><style>
+.teams{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,320px);gap:22px 19px;margin-top:28px}
+.team{min-width:0;background:#f5f6fb;border:2px solid #e5e7f0;border-radius:23px;padding:22px 21px 17px;display:flex;flex-direction:column;gap:19px}
+.team.active{background:#fff8e6;border-color:#f5c96b}
+.team .title{display:flex;gap:16px;align-items:center;font-size:29px;font-weight:900;color:#515575}
+.team .circle{width:84px;height:84px;border-radius:19px;background:var(--t);font-size:56px;font-weight:900;color:#162251;display:flex;justify-content:center;align-items:center;box-shadow:inset 0 -9px 0 #0002}
+.team .people{display:flex;flex-direction:column;gap:20px;flex:1;justify-content:center}
+.team .person{font-size:43px;font-weight:900;letter-spacing:-2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team .empty{color:#c9cdd8}
+#headline{text-align:center;font-size:30px;letter-spacing:.2px;font-weight:800;color:#686b80;margin-top:6px}
+</style></head><body><div id="viewport"><main id="stage"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="ring r4"></div>
+<header><div class="mini">TURNIR V BALINČKANJU</div><h1>SESTAVA EKIP</h1></header>
+<section class="white-panel"><div class="status-line" id="headline">POVEZOVANJE S PODATKI …</div><div class="teams" id="teams"></div></section>
+<footer><span>8 EKIP · 16 IGRALCEV</span><span id="foot-status">ŽREB</span></footer></main></div>
+<script src="./config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script><script src="./shared.js"></script>
+<script>(function(){
+  function fit(){var s=Math.min(innerWidth/1080,innerHeight/1920),el=document.getElementById('stage');el.style.transform='scale('+s+')';el.style.left=((innerWidth-1080*s)/2+(1080*s-1080)/2)+'px';el.style.top=((innerHeight-1920*s)/2+(1920*s-1920)/2)+'px';}
+  addEventListener('resize',fit);fit();
+  var colors=['#fb6263','#ffe05d','#6fe4a5','#23bfed','#cfa0ff','#ffb362','#6bdcc5','#ff9ac5'];
+  var B=window.Balinckanje,last=null;var outer=document.getElementById('teams');
+  for(var n=1;n<=8;n++){
+    var card=document.createElement('div');card.className='team';card.style.setProperty('--t',colors[n-1]);
+    card.innerHTML='<div class="title"><span class="circle">'+n+'</span>EKIPA '+n+'</div><div class="people"><div class="person empty" id="p-'+n+'-0">—</div><div class="person empty" id="p-'+n+'-1">—</div></div>';
+    outer.appendChild(card);
+  }
+  function render(data){var p=B.drawProgress(data),teams=B.teams(data,p.shown),complete=teams.reduce(function(a,t){return a+t.players.length;},0);
+    document.getElementById('headline').textContent=p.phase==='idle'?'ŽREB ŠE NI BIL IZVEDEN':complete===16?'VSE EKIPE SO ZNANE':'IZŽREBANIH IGRALCEV: '+complete+' / 16';
+    document.getElementById('foot-status').textContent=complete===16?'KONČNI REZULTAT':'ŽREB '+complete+'/16';
+    teams.forEach(function(team){var card=outer.children[team.number-1];card.classList.toggle('active',team.players.length===2);
+      for(var i=0;i<2;i++){var person=document.getElementById('p-'+team.number+'-'+i),name=team.players[i]&&team.players[i].name;person.textContent=name||'—';person.classList.toggle('empty',!name);}
+    });
+  }
+  B.watch(function(row){last=row.data;render(last);});setInterval(function(){if(last)render(last);},1000);
+})();</script></body></html>
