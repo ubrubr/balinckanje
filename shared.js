@@ -6,7 +6,7 @@ if(!cfg) throw Error('config.js must load before shared.js');
 var db=global.supabase&&global.supabase.createClient?global.supabase.createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}):null;
 var base=cfg.url+'/rest/v1/'+cfg.table, cached=null, listeners=[], timer=null, channel=null, pending=null, lastError=null;
 var names=['Anže B.','Urban Č.','Dejan L.','Jan S.','Jan R.','Marjan C.','Benjamin P.','Stanko Z.','Jakob R.','Zdravko B.','Iztok Š.','Borut G.','Marko T.','Marko D.','Kristina M.','Tone G.'];
-function initialData(){return {players:names.map(function(name,i){return {id:'p'+(i+1),name:name};}),draw:{assignments:null,order:[],startedAt:null,introMs:5000,stepMs:8500,spinMs:7140,finalMs:30000,loop:false},groupTeams:{A:[1,2,3,4],B:[5,6,7,8]},games:{},displayMode:'zreb',roundView:'1',autoToTeams:true,tieBreaks:{}};}
+function initialData(){return {players:names.map(function(name,i){return {id:'p'+(i+1),name:name};}),draw:{assignments:null,order:[],startedAt:null,introMs:5000,stepMs:8500,spinMs:7140,finalMs:30000,loop:false},groupTeams:{A:[1,2,3,4],B:[5,6,7,8]},games:{},displayMode:'zreb',roundView:'turnir',autoToTeams:true,tieBreaks:{}};}
 function headers(extra){return Object.assign({'apikey':cfg.publishableKey,'accept':'application/json'},extra||{});}
 function notify(){listeners.slice().forEach(function(fn){try{fn(cached);}catch(e){console.error(e);}});}
 function updateRow(row){
