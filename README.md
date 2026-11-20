@@ -5,7 +5,6 @@ Pokončni spletni turnir (9:16) za Play Digital Signage CMS. Vsi podatki se sinh
 ## Funkcije
 
 - 16 igralcev, 8 ekip z dvema članoma; številke ekip 1–8, vsaka se pojavi natanko dvakrat.
-- Jan R. (p5) in Marko D. (p14) vedno dobita isto številko ekipe, ostali pari so naključni.
 - Upravljanje žreba s telefona; 5 s uvoda, 16 x 8,5 s animacije, nato 30 s končnega pregleda.
 - Osrednji javni prikaz, ki samodejno preide na sestavo ekip po zaključku animacije.
 - Enostaven izločilni sistem: četrtfinale 1–8, 2–7, 3–6, 4–5; dva polfinala in finale (7 glavnih tekem). Tekma za 3. mesto je dodatna, za bronasto stopničko.
@@ -32,10 +31,10 @@ GitHub Pages je statični HTTPS strežnik. Podatki so v Supabase projektu `g-hub
 
 1. Odprite `/admin.html` na telefonu.
 2. Po potrebi popravite imena igralcev.
-3. Kliknite `USTVARI NOV ŽREB`, nato `ZAČNI ANIMACIJO`.
+3. Kliknite `USTVARI NOV ŽREB` in potrdite. Animacija se samodejno zažene.
 4. Na Play Signage naj ostane odprta stran `/` — prikaz se sam preklopi po žrebu na seznam ekip.
 5. Vnesite rezultate četrtfinala, polfinala in finala v razdelku Tekme; zmagovalci se samodejno prenesejo v naslednji krog. Za tretje mesto lahko odigrate dodatno tekmo.
-6. Za ponovni prikaz istega žreba uporabite `PONOVI ANIMACIJO`. Za nova naključna paražiranja uporabite `USTVARI NOV ŽREB`.
+6. Za ponovni prikaz istega žreba uporabite `PONOVI ISTI ŽREB`. Za nov naključni žreb izberite `USTVARI NOV ŽREB`; animacija se zažene samodejno.
 
 ## Varnost in opombe
 
