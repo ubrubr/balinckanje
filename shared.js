@@ -91,52 +91,55 @@ function teams(data,reveal){
  for(var n=1;n<=8;n++){out.push({number:n,players:(data.players||[]).filter(function(p){return data.draw&&data.draw.assignments&&data.draw.assignments[p.id]===n&&shown.has(p.id);})});}
  return out;
 }
-function groupSchedule(data){
- var g=data.groupTeams||{A:[1,2,3,4],B:[5,6,7,8]},out=[];
- ['A','B'].forEach(function(group){var t=g[group];if(!t||t.length!==4)return;
- var rounds=[[[0,3],[1,2]],[[0,2],[3,1]],[[0,1],[2,3]]];
- rounds.forEach(function(pairs,r){pairs.forEach(function(pair,i){out.push({id:group+'-R'+(r+1)+'-'+(i+1),group:group,round:r+1,home:t[pair[0]],away:t[pair[1]]});});});
- });
- return out.sort(function(a,b){return a.round-b.round||a.group.localeCompare(b.group)||a.id.localeCompare(b.id);});
+// Eight-team, single elimination tournament. Bracket positions are fixed after the draw:
+// QF1: 1 vs 8, QF2: 2 vs 7, QF3: 3 vs 6, QF4: 4 vs 5.
+// Winners progress to SF1 and SF2, then the championship final.
+function resultFor(data,id){
+ var r=(data.games||{})[id];
+ return r&&Number.isInteger(r.home)&&Number.isInteger(r.away)&&r.home>=0&&r.away>=0&&r.home<=99&&r.away<=99&&r.home!==r.away?r:null;
 }
-function resultFor(data,id){var r=(data.games||{})[id];return r&&Number.isInteger(r.home)&&Number.isInteger(r.away)?r:null;}
-function standings(data,group){
- var nums=(data.groupTeams||{})[group]||[];
- var table=nums.map(function(n){return {number:n,played:0,wins:0,gd:0,goals:0,against:0};});
- var matches=groupSchedule(data).filter(function(m){return m.group===group;});
- matches.forEach(function(m){var r=resultFor(data,m.id);if(!r)return;
- var a=table.find(function(x){return x.number===m.home;}),b=table.find(function(x){return x.number===m.away;});
- a.played++;b.played++;a.goals+=r.home;b.goals+=r.away;a.against+=r.away;b.against+=r.home;a.gd+=r.home-r.away;b.gd+=r.away-r.home;
- a.wins+=r.home>r.away?1:0;b.wins+=r.away>r.home?1:0;
- });
- var manual=(data.tieBreaks||{})[group]||[];
- table.sort(function(a,b){
-  if(a.wins!==b.wins)return b.wins-a.wins;
-  if(a.gd!==b.gd)return b.gd-a.gd;
-  if(a.goals!==b.goals)return b.goals-a.goals;
-  var tied=table.filter(function(x){return x.wins===a.wins&&x.gd===a.gd&&x.goals===a.goals;});
-  if(tied.length===2){var game=matches.find(function(m){return (m.home===a.number&&m.away===b.number)||(m.home===b.number&&m.away===a.number);});
-   if(game){var result=resultFor(data,game.id);if(result){var win=result.home>result.away?game.home:game.away;return win===a.number?-1:1;}}}
-  var ia=manual.indexOf(a.number),ib=manual.indexOf(b.number);if(ia>=0&&ib>=0)return ia-ib;
-  return a.number-b.number;
- });
- return table;
+function match(id,stage,title,home,away){
+ return {id:id,stage:stage,title:title,home:home||null,away:away||null,ready:!!(home&&away)};
 }
-function allGroupsDone(data){return groupSchedule(data).every(function(m){return !!resultFor(data,m.id);});}
-function knockoutFixtures(data){
- var blank=[{id:'SF1',home:null,away:null},{id:'SF2',home:null,away:null},{id:'THIRD',home:null,away:null},{id:'FINAL',home:null,away:null}];
- if(!allGroupsDone(data))return blank;
- var a=standings(data,'A'),b=standings(data,'B');
- var sf1={id:'SF1',home:a[0].number,away:b[1].number},sf2={id:'SF2',home:b[0].number,away:a[1].number};
- var x=resultFor(data,'SF1'),y=resultFor(data,'SF2');
- var win1=x?(x.home>x.away?sf1.home:sf1.away):null,lose1=x?(x.home>x.away?sf1.away:sf1.home):null;
- var win2=y?(y.home>y.away?sf2.home:sf2.away):null,lose2=y?(y.home>y.away?sf2.away:sf2.home):null;
- return [sf1,sf2,{id:'THIRD',home:lose1,away:lose2},{id:'FINAL',home:win1,away:win2}];
+function whoWins(data,fixture){
+ var r=fixture&&fixture.ready?resultFor(data,fixture.id):null;
+ return r?(r.home>r.away?fixture.home:fixture.away):null;
 }
-function completedKnockoutsValid(data){return knockoutFixtures(data).every(function(m){return !resultFor(data,m.id)||(m.home&&m.away);});}
+function whoLoses(data,fixture){
+ var r=fixture&&fixture.ready?resultFor(data,fixture.id):null;
+ return r?(r.home<r.away?fixture.home:fixture.away):null;
+}
+function bracketFixtures(data){
+ var q1=match('QF1','cetrtfinale','Četrtfinale 1',1,8);
+ var q2=match('QF2','cetrtfinale','Četrtfinale 2',2,7);
+ var q3=match('QF3','cetrtfinale','Četrtfinale 3',3,6);
+ var q4=match('QF4','cetrtfinale','Četrtfinale 4',4,5);
+ var s1=match('SF1','polfinale','Polfinale 1',whoWins(data,q1),whoWins(data,q2));
+ var s2=match('SF2','polfinale','Polfinale 2',whoWins(data,q3),whoWins(data,q4));
+ var f=match('FINAL','finale','Veliki finale',whoWins(data,s1),whoWins(data,s2));
+ var third=match('THIRD','tretje','Tekma za 3. mesto',whoLoses(data,s1),whoLoses(data,s2));
+ return [q1,q2,q3,q4,s1,s2,f,third];
+}
+function clearDownstream(data,id){
+ if(!data.games)data.games={};
+ var affected={
+  QF1:['SF1','FINAL','THIRD'],
+  QF2:['SF1','FINAL','THIRD'],
+  QF3:['SF2','FINAL','THIRD'],
+  QF4:['SF2','FINAL','THIRD'],
+  SF1:['FINAL','THIRD'],
+  SF2:['FINAL','THIRD']
+ };
+ (affected[id]||[]).forEach(function(key){delete data.games[key];});
+}
+function podium(data){
+ var fixtures=bracketFixtures(data),f=fixtures[6],third=fixtures[7],fr=f.ready?resultFor(data,'FINAL'):null,tr=third.ready?resultFor(data,'THIRD'):null;
+ return {gold:fr?whoWins(data,f):null,silver:fr?whoLoses(data,f):null,bronze:tr?whoWins(data,third):null,thirdPlayers:third.ready?[third.home,third.away]:[]};
+}
+function finishedCount(data){return bracketFixtures(data).slice(0,7).filter(function(m){return m.ready&&resultFor(data,m.id);}).length;}
 global.Balinckanje={cfg:cfg,read:read,watch:watch,mutate:mutate,initialData:initialData,
  generateDraw:generateDraw,validDraw:validDraw,drawProgress:drawProgress,teams:teams,shuffle:shuffle,
- groupSchedule:groupSchedule,resultFor:resultFor,standings:standings,allGroupsDone:allGroupsDone,
- knockoutFixtures:knockoutFixtures,completedKnockoutsValid:completedKnockoutsValid,
+ resultFor:resultFor,bracketFixtures:bracketFixtures,clearDownstream:clearDownstream,
+ whoWins:whoWins,whoLoses:whoLoses,podium:podium,finishedCount:finishedCount,
  getCached:function(){return cached||fromCache();},getLastError:function(){return lastError;}};
 })(window);
